@@ -61,7 +61,7 @@ void init(void)
 			glGenTextures(1,&textures);
 			if(load_tex(textures,"textures.data",2048,2048,GL_RGB,tf_mipmap))
 			{
-				const int noise_size=(sw/2)*(sh/2)*3;
+				const int noise_size=(sw()/2)*(sh()/2)*3;
 				byte *noise_data=NULL;
 				int i=0;
 
@@ -74,14 +74,14 @@ void init(void)
 				noise_data=(byte*)malloc(noise_size);
 				for(i=0 ; i<noise_size ; i++)
 					noise_data[i]=(byte)(((float)rand()/(float)RAND_MAX)*255.0f);
-				glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,sw/2,sh/2,0,GL_RGB,GL_UNSIGNED_BYTE,(const void*)noise_data);
+				glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,sw()/2,sh()/2,0,GL_RGB,GL_UNSIGNED_BYTE,(const void*)noise_data);
 				free((void*)noise_data);
 				filter_tex(tf_mipmap);
 
 				glActiveTexture(GL_TEXTURE0);
-				init_fbo(&window_fbo,sw/2,sh/2,tf_linear);
-				init_fbo(&floor_fbo,sw/2,sh/2,tf_linear);
-				init_fbo(&floor_dist,sw/2,sh/2,tf_linear);
+				init_fbo(&window_fbo,sw()/2,sh()/2,tf_linear);
+				init_fbo(&floor_fbo,sw()/2,sh()/2,tf_linear);
+				init_fbo(&floor_dist,sw()/2,sh()/2,tf_linear);
 				use_tex(textures);
 			}
 			else quit();
@@ -95,10 +95,10 @@ void loop(void)
 {
 	byte changed=0;
 
-	if(mm)
+	if(mm())
 	{
-		dir-=mx;
-		tilt-=my;
+		dir-=mx();
+		tilt-=my();
 
 		if(dir<-180.0f) dir+=360.0f;
 		else if(dir>180.0f) dir-=360.0f;
@@ -110,7 +110,7 @@ void loop(void)
 
 	if(ki(SDL_SCANCODE_UP) || ki(SDL_SCANCODE_DOWN) || ki(SDL_SCANCODE_LEFT) || ki(SDL_SCANCODE_RIGHT))
 	{
-		const float spd=5.0f*dt;
+		const float spd=5.0f*dt();
 		float t=dir, r=0.0f;
 
 		if(ki(SDL_SCANCODE_UP)  && ki(SDL_SCANCODE_LEFT)) t+=45.0f;
@@ -249,8 +249,8 @@ void loop(void)
 		use_tex(floor_dist.texs[0]);
 		glActiveTexture(GL_TEXTURE0);
 
-		glViewport(0,0,sw,sh);
-		glScissor(0,0,sw,sh);
+		glViewport(0,0,sw(),sh());
+		glScissor(0,0,sw(),sh());
 
 		/* draw scene */
 		clear();

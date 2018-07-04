@@ -22,8 +22,8 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 
 #include <signal.h>
-#include "SDL.h"
-#include <GLES2/gl2.h>
+#include <SDL2/SDL.h>
+#include "glad.h"
 #include <time.h>
 
 int _sw=0, _sh=0;
@@ -39,7 +39,7 @@ byte running=1, active=1;
 
 void sigquit(int sig);
 
-int main(void)
+int SDL_main(int argc, char *argv[])
 {
 	SDL_Window *win=NULL;
 	SDL_GLContext context;
@@ -47,9 +47,9 @@ int main(void)
 	int start=0, lt=0;
 
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,0);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_ES);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,2);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,0);
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE,24);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,8);
@@ -60,7 +60,7 @@ int main(void)
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-	win=SDL_CreateWindow(TITLE,1920,0,0,0,SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS|SDL_WINDOW_FULLSCREEN_DESKTOP|SDL_WINDOW_OPENGL);
+	win=SDL_CreateWindow(TITLE,0,0,0,0,SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS|SDL_WINDOW_FULLSCREEN_DESKTOP|SDL_WINDOW_OPENGL);
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_ShowCursor(0);
@@ -70,6 +70,8 @@ int main(void)
 		info("Vsync not supported");
 	SDL_GL_GetDrawableSize(win,&_sw,&_sh);
 	_asp=(float)_sw/(float)_sh;
+
+	gladLoadGL();
 
 	glViewport(0,0,_sw,_sh);
 	glScissor(0,0,_sw,_sh);

@@ -21,7 +21,7 @@ freely, subject to the following restrictions:
 
 #include "main.h"
 
-#include <GLES2/gl2.h>
+#include "glad.h"
 
 typedef enum {
 	tf_none,

@@ -2,7 +2,9 @@ Corridor
 ========
 A simple endless corridor demo based off Template. The point of this was to test stained glass refraction and floor tile reflections along with a scene where all lighting is baked into a texture.
 
-I'll only describe additions to the template here, see https://github.com/youka2/template README.md for more info on the rest of the layout.
+![alt text](https://github.com/mrjuan1/corridor/raw/master/screenshot.png "Screenshot")
+
+I'll only describe additions to the template here, see https://github.com/mrjuan1/template README.md for more info on the rest of the layout.
 
 Still not accepting any contributions, and this project is still licensed under the zlib license.
 
