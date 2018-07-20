@@ -10,9 +10,9 @@ How to use
 ==========
 Run `make`, you'll quickly see what's missing. All you really need is gcc, libc, SDL2 and working OpenGL drivers.
 
-Move - Arrow keys/WSAD
-Look - Move mouse
-Quit - Escape
+* Move - Arrow keys/WSAD
+* Look - Move mouse
+* Quit - Escape
 
 Also, just to avoid wasting curious peoples' time, there is no goal in this demo. The corridor is endless, the rooms cannot be entered and it is the same scene behind each window. Don't bother looking for something here, because there's really nothing to be found, it's just a rendering test.
 
@@ -28,11 +28,15 @@ The .data files are raw pixel data exported from GIMP. Literally opened baked.pn
 Build deps
 ==========
 For Linux, just make sure you have `gcc`, `libc`, `SDL2` and working OpenGL drivers.
+
 For Windows, use `mingw-w64` and `SDL2` mingw binaries. `SDL.dll` will likely be required to be in the same directory as `corridor.exe`
 
 Building
 ========
 For Linux debug, run `make`
+
 For Linux release, run `make -f Makefile.release`
+
 For Windows debug, run `make -f Makefile.windows`
+
 For Windows release, run `make -f Makefile.windows-release`
