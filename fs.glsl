@@ -1,75 +1,77 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
+//Fragment shader, this is where all the "texmode" references will start making sense
+//Also, sorry that everything is in one file, I was in a hurry to get results, time was short when I wrote this, as it is now
+#version 330 core
 
 precision lowp float;
 
+//Input object colour
 uniform vec4 col;
 
+//Texmode and texture map
 uniform int texmode;
 uniform sampler2D texmap;
 
+//Some additional texture maps for handling the various effects
 uniform sampler2D noise_tex;
 uniform sampler2D window_fbo;
 uniform sampler2D floor_fbo;
 uniform sampler2D floor_dist;
 
-varying vec2 vtc;
-varying vec4 vsc;
-varying vec4 vpos;
+//Tex coord from vertex shader
+in vec2 vtc;
+//gl_Position value from vertex shader
+in vec4 vsc;
+//Un-transformed vertex position from vertex shader
+in vec4 vpos;
 
-void main(void)
-{
-	gl_FragColor=col;
+out vec4 output;
 
-	if(texmode==1)
-		gl_FragColor*=texture2D(texmap,vtc);
-	else if(texmode==2)
-	{
-		vec2 nsc=((vsc.xy/vsc.w)*0.5)+0.5;
-		nsc+=((texture2D(noise_tex,vtc).xy*2.0)-1.0)*0.03;
+vec4 stained_glass() {
+	vec2 nsc=((vsc.xy/vsc.w)*0.5f)+0.5f;
+	nsc+=((texture(noise_tex,vtc).xy*2.0f)-1.0f)*0.03f;
 
-		gl_FragColor*=texture2D(window_fbo,nsc);
+	return texture(window_fbo,nsc);
+}
+
+vec4 floor_reflection() {
+	vec4 tex=texture(texmap,vtc);
+
+	//Slightly warp texture coords
+	vec2 nsc=((vsc.xy/vsc.w)*0.5f)+0.5f;
+	nsc+=((texture(noise_tex,vtc).xy*2.0f)-1.0f)*0.001f;
+	nsc=vec2(nsc.x,1.0f-nsc.y);
+
+	//Get view from under floor
+	vec4 refl=texture(floor_fbo,nsc);
+
+	//Reflect only a short distance, and the light
+	float thesh=0.11f;
+	if(tex.r>thesh && tex.g>thesh && tex.b>thesh) {
+		thesh=0.8f;
+		if(refl.r>thesh && refl.g>thesh && refl.b>thesh)
+			return refl;
+
+		float dist=texture(floor_dist,nsc).r;
+		return mix(tex,refl,dist*0.2f);
 	}
-	else if(texmode==3)
-	{
-		vec4 tex=texture2D(texmap,vtc);
 
-		vec2 nsc=((vsc.xy/vsc.w)*0.5)+0.5;
-		nsc+=((texture2D(noise_tex,vtc).xy*2.0)-1.0)*0.001;
-		nsc=vec2(nsc.x,1.0-nsc.y);
-		vec4 refl=texture2D(floor_fbo,nsc);
+	return tex;
+}
 
-		float thesh=0.11;
-		if(tex.r>thesh && tex.g>thesh && tex.b>thesh)
-		{
-			thesh=0.8;
-			if(refl.r>thesh && refl.g>thesh && refl.b>thesh)
-				gl_FragColor=refl;
-			else
-			{
-				float dist=texture2D(floor_dist,nsc).r;
-				gl_FragColor=mix(tex,refl,dist*0.2);
-			}
-		}
-		else gl_FragColor=tex;
+void main(void) {
+	output=col;
+
+	switch(texmode) {
+		//Basic texture output
+		case 1: output*=texture(texmap,vtc); break;
+		//Stained glass effect (warping texture coords according to the provided noise texture)
+		case 2: output*=stained_glass(); break;
+		//Floor reflection
+		case 3: output=floor_reflection(); break;
+		//Not sure what I was trying to do here, this mode is used in app.c
+		case 4: output.rgb=vec3(1.0f-(vpos.z/1.0f));
 	}
-	else if(texmode==4)
-		gl_FragColor.rgb=vec3(1.0-(vpos.z/1.0));
 
-	if(gl_FragColor.a==0.0) discard;
+	//Discard fragment if alhpa is 0
+	if(output.a==0.0f) discard;
 }

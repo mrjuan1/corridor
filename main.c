@@ -1,21 +1,3 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
 #include "main.h"
 
 #include <stdarg.h>
@@ -26,20 +8,32 @@ freely, subject to the following restrictions:
 #include "glad.h"
 #include <time.h>
 
+#define TITLE "Corridor"
+
+//Store screen width, height and aspect ratio
 int _sw=0, _sh=0;
 float _asp=0.0f;
 
+//Store input states for mouse and keyboard
+//This includes mouse movement, relative positions and wheel direction
 byte _ki[SDL_NUM_SCANCODES];
 byte _kp[SDL_NUM_SCANCODES];
 byte _mi[3], _mp[3], _mm=1;
 float _mx=0.0f, _my=0.0f, _mw=0.0f;
+//Timecode for smae-speed movements regardless of framerate (probably doesn't work as well as described though)
 float _dt=0.0f;
 
+//Values for if the application is running and focused, so no rendering when not in focus basically
 byte running=1, active=1;
 
+//Function for quitting if certain signals are received
 void sigquit(int sig);
 
+#ifdef WINDOWS
 int SDL_main(int argc, char *argv[])
+#else
+int main(void)
+#endif
 {
 	SDL_Window *win=NULL;
 	SDL_GLContext context;
@@ -57,22 +51,30 @@ int SDL_main(int argc, char *argv[])
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,0);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,0);
+	//Make the next two 0 if the application fails to start
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
 	win=SDL_CreateWindow(TITLE,0,0,0,0,SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS|SDL_WINDOW_FULLSCREEN_DESKTOP|SDL_WINDOW_OPENGL);
 
+	//Capture the cursor and keep it centered to properly calculate relative mouse position
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+	//Hide cursor from user
 	SDL_ShowCursor(0);
 
 	context=SDL_GL_CreateContext(win);
+	//Different vsync modes, see https://wiki.libsdl.org/SDL_GL_SetSwapInterval
 	if(SDL_GL_SetSwapInterval(-1)==-1 && SDL_GL_SetSwapInterval(1)==-1)
 		info("Vsync not supported");
 	SDL_GL_GetDrawableSize(win,&_sw,&_sh);
 	_asp=(float)_sw/(float)_sh;
 
+	//GL loader more specifically for Windows that fails to expose all OpenGL functions
+	//Similar to GLEW, just simpler, see https://github.com/Dav1dde/glad
+	//Generated files are included in the "glad" directory
 	gladLoadGL();
 
+	//Setup some basic GL stuffs...
 	glViewport(0,0,_sw,_sh);
 	glScissor(0,0,_sw,_sh);
 	glEnable(GL_SCISSOR_TEST);
@@ -90,12 +92,17 @@ int SDL_main(int argc, char *argv[])
 	glClearColor(0.0f,0.0f,0.0f,1.0f);
 	glClearDepthf(1.0f);
 
+	//Seed rng
 	srand(time(NULL));
+	//Init app
 	init();
+	//Get current timestamp
 	start=SDL_GetTicks();
 
+	//Start main loop
 	while(running)
 	{
+		//Process events...
 		SDL_Event event;
 		int t=0;
 
@@ -126,29 +133,37 @@ int SDL_main(int argc, char *argv[])
 
 		if(active)
 		{
+			//Update time scale
 			t=SDL_GetTicks()-start;
 			_dt=(float)(t-lt)/1000.0f;
 			lt=t;
 
+			//Run application loop
 			loop();
 			SDL_GL_SwapWindow(win);
 
+			//Wait a bit so we don't max out the main thread
 			SDL_Delay(10);
 		}
 		else
 		{
+			//Update the starting timecode so the world doesn't end when the application comes back into focus
 			start=SDL_GetTicks();
 			lt=0;
 
+			//Wait longer, because the CPU shoudln't work for something like this that's not being used
 			SDL_Delay(100);
 		}
 
+		//Reset mouse movement, offset and wheel offset values at the end of the loop
 		_mm=0;
 		_mx=_my=_mw=0.0f;
 	}
 
+	//Free application after main loop is left
 	done();
 
+	//Free remaining resources setup by SDL
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
@@ -156,6 +171,8 @@ int SDL_main(int argc, char *argv[])
 	return 0;
 }
 
+
+//See declaration above
 void sigquit(int sig)
 {
 	switch(sig)
@@ -165,6 +182,7 @@ void sigquit(int sig)
 	}
 }
 
+//printf replacement, no idea why I did this, very unnecessary
 void info(const char *text, ...)
 {
 	va_list args;
@@ -176,6 +194,7 @@ void info(const char *text, ...)
 	va_end(args);
 }
 
+//File loading function, wrapper for SDL's way if loading files
 byte fload(const char *fname, int *size, void **data)
 {
 	SDL_RWops *f=NULL;
@@ -195,6 +214,7 @@ byte fload(const char *fname, int *size, void **data)
 	}
 }
 
+//Returns some local vars...
 int get_sw(void)
 {
 	return _sw;
@@ -215,6 +235,9 @@ byte ki(unshort k)
 	return _ki[k];
 }
 
+//kp and mp only returns true once per key press.
+//So it'll return false after the first call until the key is released and pressed again
+//This can cause issues in some places, but luckily I don't use it too much here
 byte kp(unshort k)
 {
 	if(_ki[k] && !_kp[k]) return (_kp[k]=1);

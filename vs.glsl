@@ -1,33 +1,21 @@
-/* Copyright (c) 2016 youka
+//Fragment shader, this is where all the "texmode" references will start making sense
+//Also, sorry that everything is in one file, I was in a hurry to get results, time was short when I wrote this, as it is now
+#version 330 core
 
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
+//Final transformation matrix
 uniform mat4 pview;
 
-attribute vec3 pos;
-attribute vec2 tc;
+//Attributes
+in vec3 pos; //Vertex pos
+in vec2 tc; //Texture coords
 
-varying vec2 vtc;
-varying vec4 vsc;
-varying vec4 vpos;
+//Varying variables (see fragment shader)
+out vec2 vtc;
+out vec4 vsc;
+out vec4 vpos;
 
-void main(void)
-{
-	vpos=vec4(pos,1.0);
+void main(void) {
+	vpos=vec4(pos,1.0f);
 	gl_Position=pview*vpos;
 	vtc=tc;
 

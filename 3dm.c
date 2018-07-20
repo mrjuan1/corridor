@@ -1,39 +1,32 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
+//This file hold functions for some of the 3D math stuff needed
 #include "3dm.h"
 
 #include <string.h>
 
+//Fancy way to declare a 4D array if ints, compiler will attempt to vectorize all operations on this type
 typedef int __attribute__((vector_size(4*sizeof(int)),aligned(sizeof(int)))) v4i;
 
 #define shfl __builtin_shuffle
 
 const float _pi180=M_PI/180.0f;
+
+//Reference indices for calculating cross products
 const v4i _ci[2]={{1,2,0,3},{2,0,1,3}};
+
+//Identity matrix
 const mat4 _idmat={
 	{1.0f,0.0f,0.0f,0.0f},
 	{0.0f,1.0f,0.0f,0.0f},
 	{0.0f,0.0f,1.0f,0.0f},
 	{0.0f,0.0f,0.0f,1.0f}
 };
-const int _mat4s=sizeof(mat4); /* how heavy is this? */
+const int _mat4s=sizeof(mat4);
+
+//const up vector for lookat function
 const vec4 _up={0.0f,0.0f,1.0f,1.0f};
+
+//Index list for 4x4 matrix inversion
+//Mostly Google'd stuff a long time ago combined to make a fast-ish matrix inversion function, I don't rmember much about it
 const v4i _ii[6]={
 	{0,1,4,5},
 	{0,2,4,6},
@@ -43,11 +36,13 @@ const v4i _ii[6]={
 	{2,3,0,1}
 };
 
+//Degrees to radians
 float d2r(float a)
 {
 	return a*_pi180;
 }
 
+//Next few functions were shortcuts for vector-generation
 vec4 v3f(float a)
 {
 	const vec4 t={a,a,a,1.0f};
@@ -87,6 +82,7 @@ float dot(vec4 a, vec4 b)
 	return t[0]+t[1]+t[2]+t[3];
 }
 
+//Normalize, can't remember why I decided to call this "unit"
 vec4 unit(vec4 a)
 {
 	const float t=sqrtf(dot(a,a));
@@ -99,6 +95,7 @@ void idmat(mat4 m)
 	memcpy((void*)m,(const void*)_idmat,_mat4s);
 }
 
+//Perspective projection matrix generator
 void persp(mat4 m, float fov, float a, float n, float f)
 {
 	const float nf=1.0f/(n-f);
@@ -112,6 +109,7 @@ void persp(mat4 m, float fov, float a, float n, float f)
 	m[3][2]=2.0f*n*f*nf;
 }
 
+//Look-at view matrix generator
 void look(mat4 m, vec4 f, vec4 t)
 {
 	const vec4 z=unit(f-t);
@@ -134,11 +132,13 @@ void look(mat4 m, vec4 f, vec4 t)
 	m[3][3]=1.0f;
 }
 
+//Translate
 void trans(mat4 m, vec4 p)
 {
 	m[3]=(m[0]*p[0])+(m[1]*p[1])+(m[2]*p[2])+(m[3]*p[3]);
 }
 
+//Next 3 functions are for rotation
 void rotx(mat4 m, float a)
 {
 	const float r=d2r(a), c=cosf(r), s=sinf(r);
@@ -166,18 +166,22 @@ void rotz(mat4 m, float a)
 	m[1]=(t[0]*s)+(t[1]*c);
 }
 
+//Scaling
 void scal(mat4 m, vec4 s)
 {
 	int i=0; for(i=0 ; i<4 ; i++)
 		m[i]*=s[i];
 }
 
+//Multiplying two 4x4 matrices
 void mult(mat4 m, const mat4 a, const mat4 b)
 {
 	int i=0; for(i=0 ; i<4 ; i++)
 		m[i]=(a[0]*b[i][0])+(a[1]*b[i][1])+(a[2]*b[i][2])+(a[3]*b[i][3]);
 }
 
+//Matrix inversion, as mentioned before, this mess was an effort of combined Google searches and long-forgotten experiments
+//that resulted in a quicker-than-usual matrix inversion function
 void invert(mat4 m, const mat4 a)
 {
 	vec4 t1, t3;
@@ -252,6 +256,7 @@ void invert(mat4 m, const mat4 a)
 	else idmat(m);
 }
 
+//Multiplies a vector my a matrix and returns a vector
 vec4 vmat(vec4 a, const mat4 b)
 {
 	const vec4 t=(a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])+(a[3]*b[3]);

@@ -1,29 +1,11 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
 #include "gl.h"
-
-//#include <GLES2/gl2ext.h>
 
 const GLenum _clbit=(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+//Store max anisotropy if anisotropic filtering is available
 int _anis=-1;
 
+//Function to load, compile and check shaders
 unint load_shader(const char *fname, GLenum type);
 
 unint load_shader(const char *fname, GLenum type)
@@ -60,6 +42,7 @@ void clear(void)
 	glClear(_clbit);
 }
 
+//Function to load, link and check shader program
 byte load_pro(unint p, const char *vs_fname, const char *fs_fname)
 {
 	const unint vs=load_shader(vs_fname,GL_VERTEX_SHADER);
@@ -89,6 +72,7 @@ byte load_pro(unint p, const char *vs_fname, const char *fs_fname)
 	return (byte)val;
 }
 
+//Function to load texture
 byte load_tex(unint t, const char *fname, unshort w, unshort h, GLenum fmt, tex_filter tf)
 {
 	int size=0; void *data=NULL;
@@ -104,6 +88,7 @@ byte load_tex(unint t, const char *fname, unshort w, unshort h, GLenum fmt, tex_
 	else return 0;
 }
 
+//Function to filter and clamp texture
 void filter_tex(tex_filter tf)
 {
 	switch(tf)
@@ -129,6 +114,7 @@ void filter_tex(tex_filter tf)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 }
 
+//Function to setup FBO and FB texture
 void init_fbo(fbo_data *f, unshort w, unshort h, tex_filter tf)
 {
 	glGenTextures(2,f->texs);
@@ -150,6 +136,7 @@ void init_fbo(fbo_data *f, unshort w, unshort h, tex_filter tf)
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
+//Function to free FBO and FB etxture
 void done_fbo(fbo_data *f)
 {
 	glDeleteFramebuffers(1,&f->id);
@@ -158,6 +145,7 @@ void done_fbo(fbo_data *f)
 	memset((void*)f,0,sizeof(fbo_data));
 }
 
+//Function to bind FBO and update viewport
 void use_fbo(const fbo_data *f)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER,f->id);

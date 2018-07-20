@@ -1,27 +1,13 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
+//This file sets up the basic shaders being used (even though onyl one set of shaders are being used)
 #include "basic.h"
 
+//Poorly-named constant of texcoord offste in main VBO (see closer to the end of this file)
 const void *_basic_offset=(const void*)(3*sizeof(float));
 
+//Store where or not initialization succeeded
 byte _basic_init=0;
 
+//Variables related to the shader program
 unint _basic_p=0;
 struct {
 	int pview, pos, tc;
@@ -33,8 +19,10 @@ struct {
 
 byte init_basic(void)
 {
+	//Dont' allow initializing again
 	if(!_basic_init)
 	{
+		//Create the program, load the shaders and link them
 		_basic_p=glCreateProgram();
 		if(load_pro(_basic_p,"vs.glsl","fs.glsl"))
 		{
@@ -55,6 +43,7 @@ byte init_basic(void)
 			_basic_pv.floor_fbo=glGetUniformLocation(_basic_p,"floor_fbo");
 			_basic_pv.floor_dist=glGetUniformLocation(_basic_p,"floor_dist");
 
+			//Send defaults to the shader
 			idmat(mat);
 			send_pview(mat);
 			glEnableVertexAttribArray(_basic_pv.pos);
@@ -72,7 +61,7 @@ byte init_basic(void)
 
 			_basic_init=1;
 		}
-		else
+		else //If initialization fails...
 		{
 			glDeleteProgram(_basic_p);
 			info("Program not created\n");
@@ -84,6 +73,7 @@ byte init_basic(void)
 
 void done_basic(void)
 {
+	//Delete program if initialized
 	if(_basic_init)
 	{
 		glDeleteProgram(_basic_p);
@@ -91,22 +81,26 @@ void done_basic(void)
 	}
 }
 
+//Send final matrix to shader
 void send_pview(const mat4 mat)
 {
 	glUniformMatrix4fv(_basic_pv.pview,1,GL_FALSE,(const float*)mat);
 }
 
+//Setup attrib info for used program
 void send_attribs(void)
 {
 	glVertexAttribPointer(_basic_pv.pos,3,GL_FLOAT,GL_FALSE,stride(),NULL);
 	glVertexAttribPointer(_basic_pv.tc,2,GL_FLOAT,GL_FALSE,stride(),_basic_offset);
 }
 
+//Send base-colour to shader
 void send_col(vec4 col)
 {
 	glUniform4fv(_basic_pv.col,1,(const float*)&col);
 }
 
+//Change the render mode, see fragment shader for different render modes
 void texmode(int mode)
 {
 	glUniform1i(_basic_pv.texmode,mode);

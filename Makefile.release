@@ -2,7 +2,7 @@
 OBJS=main.o 3dm.o gl.o basic.o vbo.o app.o glad/glad.o
 O=corridor
 
-CFLAGS=-nocpp -g3 -Og -pipe -m64 -march=native -mtune=native
+CFLAGS=-nocpp -O3 -pipe -m64
 CFLAGS+=-ftree-vectorize -ffast-math -funroll-loops
 LDFLAGS=-lSDL2 -lm -ldl
 
@@ -13,3 +13,4 @@ clean:
 
 ${O}: ${OBJS}
 	${CC} $^ -o $@ ${LDFLAGS}
+	strip -s $@

@@ -1,28 +1,12 @@
-/* Copyright (c) 2016 youka
-
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgement in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution. */
-
 #include "vbo.h"
 
 const int _stride=5*sizeof(float);
 
+//VBO setup stuff, similar style to "basic.c", so be sure to check the comments there
 byte _vbo_init=0;
 
 unint _vbo=0;
+//Local var for vbo vertex data, gets freed when sending data to GPU
 char *_vdata=NULL;
 int _vdata_size=0;
 
@@ -61,6 +45,7 @@ void done_vbo(void)
 	}
 }
 
+//Function for loading models into the VBO buffer before sending to the GPU
 void add_to_vbo(vbo_data *v, const void *data, int size)
 {
 	const int offset=_vdata_size;
@@ -75,6 +60,7 @@ void add_to_vbo(vbo_data *v, const void *data, int size)
 	v->count=size/_stride;
 }
 
+//Function for sending the VBO to the GPU and freeing the local vertex buffer
 void update_vbo(void)
 {
 	if(_vdata!=NULL)
@@ -88,6 +74,7 @@ void update_vbo(void)
 	else info("No data in VBO to update\n");
 }
 
+//Function for drawing a section of the VBO
 void draw_vbo(const vbo_data *v)
 {
 	glDrawArrays(GL_TRIANGLES,v->offset,v->count);

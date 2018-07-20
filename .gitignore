@@ -1,4 +1,5 @@
-originals
+next.txt
 *.o
 corridor
-a.exe
+corridor.exe
+originals

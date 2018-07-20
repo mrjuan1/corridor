@@ -1,10 +1,11 @@
-#Makefile for building project for Linux
+#Makefile for building project for Windows
 OBJS=main.o 3dm.o gl.o basic.o vbo.o app.o glad/glad.o
-O=corridor
+O=corridor.exe
 
-CFLAGS=-nocpp -g3 -Og -pipe -m64 -march=native -mtune=native
+CC=gcc
+CFLAGS=-nocpp -g3 -Og -pipe -m64 -march=native -mtune=native -DWINDOWS=1
 CFLAGS+=-ftree-vectorize -ffast-math -funroll-loops
-LDFLAGS=-lSDL2 -lm -ldl
+LDFLAGS=-lmingw32 -lSDL2main -lSDL2 -lm -mwindows
 
 all: ${O}
 
