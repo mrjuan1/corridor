@@ -24,7 +24,7 @@ in vec4 vsc;
 //Un-transformed vertex position from vertex shader
 in vec4 vpos;
 
-out vec4 output;
+out vec4 output_col;
 
 vec4 stained_glass() {
 	vec2 nsc=((vsc.xy/vsc.w)*0.5f)+0.5f;
@@ -59,19 +59,19 @@ vec4 floor_reflection() {
 }
 
 void main(void) {
-	output=col;
+	output_col=col;
 
 	switch(texmode) {
 		//Basic texture output
-		case 1: output*=texture(texmap,vtc); break;
+		case 1: output_col*=texture(texmap,vtc); break;
 		//Stained glass effect (warping texture coords according to the provided noise texture)
-		case 2: output*=stained_glass(); break;
+		case 2: output_col*=stained_glass(); break;
 		//Floor reflection
-		case 3: output=floor_reflection(); break;
+		case 3: output_col=floor_reflection(); break;
 		//Not sure what I was trying to do here, this mode is used in app.c
-		case 4: output.rgb=vec3(1.0f-(vpos.z/1.0f));
+		case 4: output_col.rgb=vec3(1.0f-(vpos.z/1.0f));
 	}
 
 	//Discard fragment if alhpa is 0
-	if(output.a==0.0f) discard;
+	if(output_col.a==0.0f) discard;
 }
