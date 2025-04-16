@@ -2,7 +2,7 @@
 
 A simple endless corridor demo showing off stained glass and reflective floors. All lighting, shadows and AO are baked into an environment map texture, so no lighting calculations are being done here. Sorry.
 
-![Screenshot](creenshot.png)
+![Screenshot](screenshot.png)
 
 Not accepting any contributions, and decided to dump this projects license. It's completely free for anyone to do with it as they please, and I take absolutely no responsibility for anything that might arise from the usage of this project in any way.
 
