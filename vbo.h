@@ -1,15 +1,15 @@
-//Header-file for model-loading functions, see vbo.c
+// Header-file for model-loading functions, see vbo.c
 #ifndef __VBO_H__
 #define __VBO_H__
 
 #include "app.h"
 
-//Simple "model" structure
+// Simple "model" structure
 typedef struct {
-	int offset, count;
+  int offset, count;
 } vbo_data;
 
-//Another unnecessary define
+// Another unnecessary define
 #define stride() get_stride()
 
 int get_stride(void);

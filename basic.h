@@ -1,4 +1,4 @@
-//Header file for basic shader program, see basic.c for more info
+// Header file for basic shader program, see basic.c for more info
 #ifndef __BASIC_H__
 #define __BASIC_H__
 

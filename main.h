@@ -1,22 +1,22 @@
-//Header for main.c, see that file for more info
-//Basically main.c sets up the window, context and handle input and timing
+// Header for main.c, see that file for more info
+// Basically main.c sets up the window, context and handle input and timing
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-//Come global includes for all to use
+// Come global includes for all to use
+#include <malloc.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 
 #include <SDL2/SDL_scancode.h>
 
-//Some unnecessary typedefs
+// Some unnecessary typedefs
 typedef unsigned char byte;
 typedef unsigned short unshort;
 typedef unsigned int unint;
 
-//Some unnecessary defines
+// Some unnecessary defines
 #define sw() get_sw()
 #define sh() get_sh()
 #define mm() get_mm()
@@ -25,11 +25,11 @@ typedef unsigned int unint;
 #define mw() get_mw()
 #define dt() get_dt()
 
-//Some unnecessary functions
+// Some unnecessary functions
 void info(const char *text, ...);
 byte fload(const char *fname, int *size, void **data);
 
-//The rest of main.c's declarations
+// The rest of main.c's declarations
 int get_sw(void), get_sh(void);
 float asp(void);
 
